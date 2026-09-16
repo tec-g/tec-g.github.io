@@ -1,1 +1,0 @@
-# tec-g.github.io
