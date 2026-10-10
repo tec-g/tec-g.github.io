@@ -1,0 +1,158 @@
+<!DOCTYPE html> 
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>tec's work</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Concert+One&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <main>
+            <header>
+                <h1>tecg's work</h1>
+                <h2>Dropper</h2>
+                <p>solo project | godot</p>
+                <p>frame-by-frame | turn-based | fighting game</p>
+            </header>
+            <article>
+                <p>
+                    this was my graduation project. <br>
+                    essentially a 3D port of YOMI Hustle mechanics. 
+                </p>
+                <img>
+                <p>
+                    core idea of Dropper and YOMI Hustle is to make it possible for a human 
+                    to perform incredibly precise actions, which are only seen in movies.
+                </p>
+                <img>
+                <p>
+                    to achieve that you stop the time when any of the character is ready to act.
+                </p>
+                <img>
+                <p>
+                    while this approach doesn't have the same drive as common fighting games or hack & slash,
+                    it turns a game from button mashing to quick tactical thinking.
+                    it rewards player's skill in a different way with the similar level of excitment
+                </p>
+            </article>
+            <div class="separator"></div>
+            <h2>development</h2>
+            <article>
+                <p>
+                    but <b>how</b> you stop time? how do you even handle something, that can pause at any moment?
+                    my solution includes two parts, first of which is a frame counter
+                </p>
+                <img>
+                <p>
+                    initially i wanted to <i>actually</i> pause. godot has a way of stopping script execution.
+                    it would handle a lot of annoyances (which i will cover later) by itself.
+                    but it obviously makes it harder to interact with game elements. there may be a way to do 
+                    it like that, but i didn't have time to work in this direction. so i landed with counting frames myself.
+                </p>
+                <br>
+                <p>
+                    which brings me to the second part of solution. how do you even make a skill? <br>
+                    <br>
+                    imagine you want to add a sword combo for your hack & slash/fighting game. <br>
+                    <b>slash -> step back -> pierce -> double slash</b> <br>
+                    you create your skill function and character does the combo with a single click. <br>
+                    <br>
+                    but now you want this combo to be a series of inputs. so you wait for player's inputs. <br>
+                    but what if player doesn't press anything for a while? you need to add check for that. <br>
+                    what if player gets inturrepted? you now need to check for that too <br>
+                    <br>
+                    and these "what if" questions keeps piling up, not to mention specifics of my game.
+                    i needed a robust solution, which can handle any situation modulary.<br>
+                    <br>
+                    so i started calling skill function every <b>my</b> frame and parsing refence frame.
+                    skill looks at reference frame and, based on it, does something or nothing.
+                    you gain full control of the game flow. (as a bonus, it makes replay recording easier)
+                </p>
+                <div class="separator"></div>
+                <h3>implementation</h3>
+                <p>
+                    this is how i build my own way of implement anything that could be called a skill in video games.<br>
+                    i start out with a base class of <i>something</i> that has/can have a skill. 
+                </p>
+                <figure class="code-block">
+                    <figcaption>gdscript</figcaption>
+                    <pre><code>
+class_name BaseClass # usually also abstract 
+
+var skill_collection: Array[Callable] = [] 
+
+func use_skill(i: int) 
+    skill_collection[i].call()
+                    </code></pre>
+                </figure>
+                <p>extend the base class and add skill function to the collection</p>
+                <figure class="code-block">
+                    <figcaption>gdscript</figcaption>
+                    <pre><code>
+class_name LowerClass
+extends BaseClass
+
+func _ready() -> void:
+    skill_collection.append(skill_1)
+
+func skill_1() -> void:
+    pass # do somethin
+                    </code></pre>
+                </figure>
+                <p>
+                    in godot, you can store functions (<code class="inline-code">Callable</code>)
+                    in variables just like any other <code class="inline-code">Object</code> or <code class="inline-code">Variant</code>. <br>
+                    this is why i love this method. easy and an interesting way
+                    to interact with the engine. <br>
+                    <br>
+                    details of implementation varies on what you want specificly. in this case, i needed per-frame execution. <br>
+                    so it would look something like that
+                </p>
+                <figure class="code-block">
+                    <figcaption>gdscript</figcaption>
+                    <pre><code>
+# ref_frame = skill_activation_frame - current_frame
+func triple_combo(ref_frame: int) -> void:
+    if ref_frame == 2:
+        deal_damage(5)
+    if ref_frame == 4:
+        move(Vector3(x, y, z)) # away from target
+    if ref_frame == 9:
+        move(Vector3(x, y, z)) # toward target
+        deal_damage(5)
+    if ref_frame == 10:
+        deal_damage(5)
+                    </code></pre>
+                </figure>
+                <p>
+                    you can use names of the functions as name of the skill. you use
+                    <code class="inline-code">Callable.get_method()</code> to get it in
+                    <code class="inline-code">StringName</code> format, which you can past in a 
+                    <code class="inline-code">Label</code> to display it.
+                    i am deliberetly ommiting a number of other question and deeper implementation details. 
+                    because there may be a better way of doing and my implementation is not perfect. 
+                    i don't want to lock someone, who may be reading it, into a specific structure. <br>
+                </p>
+                <div class="separator"></div>
+                <h3>footnote</h3>
+                <p>
+                    if you know godot, you may wonder why i didn't use 
+                    <code class="inline-code">Resource</code> to build skills. 
+                    on the surface they provide in-editor way of creating skills
+                    and also neetly stores in the file system. in short, i follow this princple <br>
+                    <br>
+                    <b>"do I need this somewhere else? if not, put it in a node"</b> <br>
+                    <br>
+                    if you wanna know <b>why</b>, check out the 
+                    <a href="reach_the_point.html">Reach the point</a> project,
+                    where i implemented skill system with resources and later regret it 
+                </p>
+            </article>
+        </main>
+    </body>
+</html>
