@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>tec's work</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Concert+One&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <main>
+            <header>
+                <a href="index.html">↩ to main</a>
+                <h1>tecg's work</h1>
+                <h2>Lost in Trainslation</h2>
+                <p>team effort | godot</p>
+                <p>puzzle game</p>
+            </header>
+            <article>
+                <p>
+                    entry for GMTK Game Jam 2026.
+                    joined a team of <b>10</b> people as a programmer. <br>
+                    <br>
+                    game tells a short story about getting lost in a solar punk world,
+                    where everyone speaks an unknown to you language. through observation 
+                    of surroundings, player slowly builds understanding of the language,
+                    to buy a correct ticket for the train to reach your destination. <br>
+                    <br>
+                    my task was creating a way to render this language into the world
+                    and also make it interactable with the notepad
+                </p>
+            </article>
+            <div class="separator"></div>
+            <h2>development</h2>
+            <article>
+                <p>
+                    creating different language in most cases is an easy task.
+                    you map custom characters into english or any other language. 
+                    now, when you type they would appear as your language. <br>
+                    <br>
+                    but it wasn't a usual case. a single character could represent a single word -
+                    more like Chinese. so i needed a way to type in this language and locate correct hieroglyphs. <br>
+                    it's not including making it also interactable, but first step is typing and rendering. <br>
+                </p>
+                <div class="separator"></div>
+                <h3>drawing</h3>
+                <p>
+                    main idea is to have a <code class="inline-code">JSON</code>
+                    file, with translations pointing towards
+                    texture patch with correct hieroglyph. 
+                    but there also should be a way differentiate 
+                    normal english from translation within a single line of string.
+                    i've added '<<>>' brackets and used code to locate them <br>
+                </p>
+                <img width="100%" src="imgs/trainslation/location_process.svg">
+                <p>
+                    storing <code class="inline-code">Vector2</code> as coordinates would work, but
+                    it's inconvenient to use. a simple number, indicating position on a spritesheet
+                    as ID makes more sense to other developers <br>
+                <br>
+                    <code class="inline-code">CanvasItem.draw_texture_rect_region()</code>
+                    used to draw hieroglyphs. it takes two 
+                    <code class="inline-code">Rect2</code>. first tells where to draw,
+                    second tells what part of the <code class="inline-code">Texture2D</code>
+                    to draw<br>
+                    <br>
+                    but a thought struck me: "what if word is made out of several hieroglyphs?".
+                    so now i need a way to store and use arbitrary numbers of ID. my choice
+                    was to use "*.*.*" format. a string where numbers separated with dot. 
+                    string looks beter and quicker to use then 
+                    <code class="inline-code">Array[int]</code>
+                    in the editor as shown on the image below 
+                </p>
+                <br>
+                <img src="imgs/trainslation/string_vs_int_array.png"> <br>
+                <br>
+                <p>
+                    iterating through this format is not a hard task. get the number with
+                    <code class="inline-code">String.to_int()</code> and draw, like in a single number case <br>
+                    <br>
+                    result is an easy to interact and expandable system which other developer can use
+                    without constanly questining how to do this and that. <br>
+                    <br>
+                    when it came to implementing this system a road block appeared in front of me. <br>
+                    <br>
+                    <b>to properly render language i need to render normal english along side it</b> <br>
+                    <br>
+                    solutions with spliting string into <code class="inline-code">Label</code> 
+                    (for the English) and <code class="inline-code">TextureRect</code> (for the language)
+                    i dissmised immediately as a workaround not a solution. 
+                    since rendering text is time consuming rather then hard.
+                    <code class="inline-code">Font</code> class provide tools for finding size of the text.
+                    i am not going into details, because it's really just this:
+                    find right function and position your text and hieroglyphs in the right place.
+                </p>
+                <div class="separator"></div>
+                <h3>interaction</h3>
+                <p>
+                    great, there is a <code class="inline-code">Control</code> node that can render our
+                    language and english at the same time. now it's time to make it interactable. 
+                    let's start out with how it would look like. having a separate class for this purpose is prefferable. interactables will also be placed
+                    in the world. <br>
+                    clickable area that holds encoded string ("*.*.*" format) and emits global signal
+                    when clicked with this string attached. just standard godot usage.
+                    but i want to mention ability to write in "<<***>>" format. this area
+                    holds a variable where you can write normal words, which will be 
+                    automatically encoded and stored in another variable
+                </p>
+                <figure class="code-block">
+                    <figcaption>gdscript</figcaption>
+                    <pre><code>
+@export var encoded: String = ''
+
+@export var string: String = '' :
+    set(value):
+        string = value
+        encoded = encode_string(string)
+                    </code></pre>
+                </figure>
+                <p>
+                    you do not need to remember what number corresponds to what word/hieroglyph.
+                    type a word with bracket and it will fill automatically. 
+                    just make sure this word exist in the <code class="inline-code">JSON</code>. <br>
+                    while it's not the ful extend of my work, i've covered main part of my contribution.
+                    <br> 
+                    <br>
+                    also initially i foolishly used 
+                    <code class="inline-code">Area2D</code> to look for players input in an area.
+                    <code class="inline-code">Node2D</code> and <code class="inline-code">Control</code>
+                    nodes doesn't really work well together, especially when it comes to interaction with mouse.
+                    <code class="inline-code">Control</code> have some sort of priority, when it comes to mouse inputs.
+                    nodes are layered always on top of each other, causing a lot of problems. 
+                    only some time later i refactored it to <code class="inline-code">Control</code>. <br>
+                </p>
+                <div class="separator"></div>
+                <h3>footnote</h3>
+                <p>
+                    fun fact, no one actually knew that you can write IDs like that "*.*.*""
+                    so big part of my system laid dormant for the whole duration of the jam. 
+                    in some way, that's because there is no way to tell if this hieroglyph
+                    is one word or a part of a bigger word. with time not being on our side
+                    i decided to not mention this feature, to not expand scope of the project.
+                </p>
+            </article>
+        </main>
+    </body>

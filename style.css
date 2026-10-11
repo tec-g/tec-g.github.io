@@ -10,7 +10,7 @@
     I like how it's closer to the content of the page
 */
 html {
-    background-color: bisque;
+    background-color: #ffe4c4;
     height: 100%;
     width: 100%;
 }
@@ -26,6 +26,7 @@ body {
     font-family: 'JetBrains Mono', Courier, monospace;
     background-color: rgb(223, 199, 170);
     padding: 0px 2px;
+    font-weight: 300;
 }
 
 .code-block * {
@@ -81,7 +82,7 @@ article {
     margin: 15px 0px;
 }
 
-article h4 {
+article .article-desc {
     text-align: center;
 }
 
@@ -98,17 +99,17 @@ article h4 {
     justify-content: space-between;
 }
 
-.projects-el h5 {
+.projects-el p {
     margin: 0px 10px;
     text-align: center;
 }
 
 h1 {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 h2 {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
 }
 
 h3 {
