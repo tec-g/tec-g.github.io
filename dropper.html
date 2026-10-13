@@ -140,9 +140,25 @@ func triple_combo(ref_frame: int) -> void:
                     i don't want to lock someone, who may be reading it, into a specific structure. <br>
                 </p>
                 <div class="separator"></div>
+                <h3>controllig</h3>
+                <p>
+                    there was an interesting problem with controling characters. in YOMI Hustle,
+                    when skill needs omni-directional input, it uses a special controller.
+                    distance from center is velocity/distance and angle is direction. there are several forms of it,
+                    but all with the same purpose behind it. Dropper addopted this method, but in 3D there is two angles that form direction.
+                    my solution was to imagine this controller as a flat projection of the sphere, where inner portion 
+                    is pointing down and outer portion pointing up. it loses velocity/distance control, but it could be addded as a simple slider. <br>
+                    <br>
+                    there was another way of implementing it. create two of these controllers. one controls direction and motion of XZ plane, other 
+                    on XY plane. but i do not see any advantages of this option over the other and viceversa. to me this is just individual preference.
+                    they both could be implemented with a toggle to switch between them. <br>
+                    <br>
+                    other controls did not require any kind of special solution. 
+                </p>
             </article>
+            <div class="separator"></div>
             <article>
-                <h3>footnote</h3>
+                <h2>footnote</h2>
                 <p>
                     if you know godot, you may wonder why i didn't use 
                     <code class="inline-code">Resource</code> to build skills. 
